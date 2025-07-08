@@ -6,21 +6,26 @@ import {
   deleteProject,
 } from "../controllers/projectController";
 import upload from "../middlewares/multer";
+// Impor middleware protect
+import { protect } from "../middlewares/authMiddleware";
 
 const router = Router();
 
+// Rute ini tetap publik, siapa saja bisa melihat proyek
 router.get("/", getProjects);
 
-// Menggunakan upload.fields untuk menerima beberapa jenis file
+// Amankan rute untuk membuat proyek baru
 router.post(
   "/",
+  protect, // Tambahkan ini: Hanya user yang sudah login bisa mengakses
   upload.fields([
     { name: "thumbnail", maxCount: 1 },
-    { name: "projectImages", maxCount: 10 }, // Izinkan hingga 10 gambar proyek
+    { name: "projectImages", maxCount: 10 },
   ]),
   createProject
 );
 
-router.delete("/:id", deleteProject);
+// Amankan rute untuk menghapus proyek
+router.delete("/:id", protect, deleteProject); // Tambahkan protect di sini
 
 export default router;

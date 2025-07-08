@@ -6,11 +6,18 @@ import {
   deleteTechStack,
 } from "../controllers/techStackController";
 import upload from "../middlewares/multer";
+// Impor middleware protect
+import { protect } from "../middlewares/authMiddleware";
 
 const router = Router();
 
+// Rute ini tetap publik
 router.get("/", getTechStacks);
-router.post("/", upload.single("logo"), createTechStack); // Field name 'logo'
-router.delete("/:id", deleteTechStack);
+
+// Amankan rute untuk membuat tech stack baru
+router.post("/", protect, upload.single("logo"), createTechStack); // Tambahkan protect
+
+// Amankan rute untuk menghapus tech stack
+router.delete("/:id", protect, deleteTechStack); // Tambahkan protect
 
 export default router;
