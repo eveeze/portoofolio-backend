@@ -15,9 +15,9 @@ const router = Router();
 router.get("/", getTechStacks);
 
 // Amankan rute untuk membuat tech stack baru
-router.post("/", protect, upload.single("logo"), createTechStack); // Tambahkan protect
+router.post("/", protect, upload.single("logo"), createTechStack);
 
 // Amankan rute untuk menghapus tech stack
-router.delete("/:id", protect, deleteTechStack); // Tambahkan protect
+router.delete("/:id", protect, deleteTechStack);
 
 export default router;

@@ -76,6 +76,24 @@ export const getById = query({
 // --- MUTATIONS (Write operations) ---
 
 // Create a new project
+
+export const update = mutation({
+  args: {
+    id: v.id("projects"),
+    title: v.optional(v.string()),
+    description: v.optional(v.string()),
+    techStack: v.optional(v.array(v.id("techStacks"))),
+    projectUrl: v.optional(v.string()),
+    githubUrl: v.optional(v.string()),
+    thumbnailUrl: v.optional(v.string()),
+    thumbnailId: v.optional(v.string()),
+  },
+  handler: async (ctx, { id, ...args }) => {
+    await ctx.db.patch(id, args);
+    return id; // Mengembalikan ID proyek yang diperbarui
+  },
+});
+
 export const create = mutation({
   args: {
     title: v.string(),
@@ -99,8 +117,13 @@ export const create = mutation({
     return projectId;
   },
 });
+export const removeImageFromProject = mutation({
+  args: { imageId: v.id("projectImages") },
+  handler: async (ctx, args) => {
+    await ctx.db.delete(args.imageId);
+  },
+});
 
-// Menambahkan gambar ke proyek yang sudah ada
 export const addImageToProject = mutation({
   args: {
     projectId: v.id("projects"),
@@ -120,16 +143,13 @@ export const addImageToProject = mutation({
 export const remove = mutation({
   args: { id: v.id("projects") },
   handler: async (ctx, args) => {
-    // Pertama, kita harus menghapus semua gambar terkait dari tabel projectImages
     const imagesToDelete = await ctx.db
       .query("projectImages")
       .withIndex("by_projectId", (q) => q.eq("projectId", args.id))
       .collect();
 
-    // Hapus setiap entri gambar
     await Promise.all(imagesToDelete.map((image) => ctx.db.delete(image._id)));
 
-    // Kemudian, hapus proyek itu sendiri
     await ctx.db.delete(args.id);
   },
 });

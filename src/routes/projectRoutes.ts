@@ -3,6 +3,7 @@ import { Router } from "express";
 import {
   getProjects,
   createProject,
+  updateProject,
   deleteProject,
 } from "../controllers/projectController";
 import upload from "../middlewares/multer";
@@ -11,21 +12,26 @@ import { protect } from "../middlewares/authMiddleware";
 
 const router = Router();
 
-// Rute ini tetap publik, siapa saja bisa melihat proyek
 router.get("/", getProjects);
 
-// Amankan rute untuk membuat proyek baru
 router.post(
   "/",
-  protect, // Tambahkan ini: Hanya user yang sudah login bisa mengakses
+  protect,
   upload.fields([
     { name: "thumbnail", maxCount: 1 },
     { name: "projectImages", maxCount: 10 },
   ]),
   createProject
 );
-
-// Amankan rute untuk menghapus proyek
-router.delete("/:id", protect, deleteProject); // Tambahkan protect di sini
+router.put(
+  "/:id",
+  protect, // Amankan rute ini
+  upload.fields([
+    { name: "thumbnail", maxCount: 1 },
+    { name: "projectImages", maxCount: 10 },
+  ]),
+  updateProject
+);
+router.delete("/:id", protect, deleteProject);
 
 export default router;

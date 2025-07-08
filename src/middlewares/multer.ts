@@ -4,9 +4,13 @@ import multer from "multer";
 const storage = multer.memoryStorage();
 
 const fileFilter = (req: any, file: any, cb: any) => {
-  if (!file.mimetype.match(/^image\/(jpeg|png|gif|webp)$/)) {
-    // Tolak file jika bukan gambar
-    return cb(new Error("Only image files are allowed!"), false);
+  // Ditambahkan 'svg\+xml' untuk menerima file SVG
+  if (!file.mimetype.match(/^image\/(jpeg|png|gif|webp|svg\+xml)$/)) {
+    // Tolak file jika bukan tipe gambar yang diizinkan
+    return cb(
+      new Error("Only jpeg, png, gif, webp, and svg files are allowed!"),
+      false
+    );
   }
   cb(null, true);
 };
