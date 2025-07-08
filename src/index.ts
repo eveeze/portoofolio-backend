@@ -1,21 +1,35 @@
 // src/index.ts
+// src/index.ts
 import express, { Application, Request, Response } from "express";
 import cors from "cors";
 import dotenv from "dotenv";
-import projectRoutes from "./routes/projectRoutes";
 import cookieParser from "cookie-parser";
+
+// Impor semua rute yang ada
+import projectRoutes from "./routes/projectRoutes";
+import techStackRoutes from "./routes/techStackRoutes";
+import authRoutes from "./routes/authRoutes";
 
 dotenv.config();
 
 const app: Application = express();
 const PORT = process.env.PORT || 5001;
 
-app.use(cors());
+// Atur CORS agar origin frontend bisa mengakses
+const corsOptions = {
+  origin: process.env.RP_ORIGIN || "http://localhost:5173",
+  credentials: true,
+};
+
+app.use(cors(corsOptions));
 app.use(express.json());
-app.use(cookieParser()); // Gunakan
+app.use(cookieParser());
 
 app.use(express.urlencoded({ extended: true }));
 
+// Daftarkan semua routes
+app.use("/api/auth", authRoutes); // Tambahkan ini
+app.use("/api/tech-stacks", techStackRoutes); // Tambahkan ini
 app.use("/api/projects", projectRoutes);
 
 app.get("/", (req: Request, res: Response) => {
