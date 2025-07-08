@@ -9,6 +9,7 @@ import cookieParser from "cookie-parser";
 import projectRoutes from "./routes/projectRoutes";
 import techStackRoutes from "./routes/techStackRoutes";
 import authRoutes from "./routes/authRoutes";
+import devRoutes from "./routes/devRoutes";
 
 dotenv.config();
 
@@ -31,6 +32,10 @@ app.use(express.urlencoded({ extended: true }));
 app.use("/api/auth", authRoutes); // Tambahkan ini
 app.use("/api/tech-stacks", techStackRoutes); // Tambahkan ini
 app.use("/api/projects", projectRoutes);
+if (process.env.NODE_ENV !== "production") {
+  console.log("🛠️  Development routes are enabled.");
+  app.use("/api/dev", devRoutes);
+}
 
 app.get("/", (req: Request, res: Response) => {
   res.send("Portfolio Backend Server is running!");
