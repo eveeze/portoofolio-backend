@@ -15,6 +15,7 @@ import type {
 } from "convex/server";
 import type * as projects from "../projects.js";
 import type * as techStacks from "../techStacks.js";
+import type * as users from "../users.js";
 
 /**
  * A utility for referencing Convex functions in your app's API.
@@ -27,6 +28,7 @@ import type * as techStacks from "../techStacks.js";
 declare const fullApi: ApiFromModules<{
   projects: typeof projects;
   techStacks: typeof techStacks;
+  users: typeof users;
 }>;
 export declare const api: FilterApi<
   typeof fullApi,

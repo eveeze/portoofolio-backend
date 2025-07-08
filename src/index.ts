@@ -3,6 +3,7 @@ import express, { Application, Request, Response } from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 import projectRoutes from "./routes/projectRoutes";
+import cookieParser from "cookie-parser";
 
 dotenv.config();
 
@@ -11,6 +12,8 @@ const PORT = process.env.PORT || 5001;
 
 app.use(cors());
 app.use(express.json());
+app.use(cookieParser()); // Gunakan
+
 app.use(express.urlencoded({ extended: true }));
 
 app.use("/api/projects", projectRoutes);
