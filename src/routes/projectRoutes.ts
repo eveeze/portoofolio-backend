@@ -9,10 +9,10 @@ import {
 import upload from "../middlewares/multer";
 // Impor middleware protect
 import { protect } from "../middlewares/authMiddleware";
-
+import { cache, clearCache } from "../middlewares/cacheMiddleware";
 const router = Router();
-
-router.get("/", getProjects);
+const PROJECTS_CACHE_KEY = "projects:all";
+router.get("/", cache(PROJECTS_CACHE_KEY), getProjects);
 
 router.post(
   "/",
@@ -21,7 +21,9 @@ router.post(
     { name: "thumbnail", maxCount: 1 },
     { name: "projectImages", maxCount: 10 },
   ]),
-  createProject
+  clearCache(PROJECTS_CACHE_KEY),
+
+  createProject,
 );
 router.put(
   "/:id",
@@ -30,8 +32,10 @@ router.put(
     { name: "thumbnail", maxCount: 1 },
     { name: "projectImages", maxCount: 10 },
   ]),
-  updateProject
+
+  clearCache(PROJECTS_CACHE_KEY),
+  updateProject,
 );
-router.delete("/:id", protect, deleteProject);
+router.delete("/:id", protect, clearCache(PROJECTS_CACHE_KEY), deleteProject);
 
 export default router;
