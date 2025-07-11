@@ -7,6 +7,7 @@ import dotenv from "dotenv";
 import { Id } from "../../convex/_generated/dataModel";
 
 import asyncHandler from "express-async-handler";
+import { title } from "process";
 dotenv.config();
 
 if (!process.env.CONVEX_URL) {
@@ -14,7 +15,11 @@ if (!process.env.CONVEX_URL) {
 }
 
 const convex = new ConvexHttpClient(process.env.CONVEX_URL as string);
-
+/*
+ * Helper function untuk mengunggah file ke uploadToCloudinary
+ * @param filebuffer Buffer dari file yang akan diunggah
+ * @return Promise yang resolve dengan hasil dari Cloudinary
+ * */
 const uploadToCloudinary = (fileBuffer: Buffer): Promise<any> => {
   return new Promise((resolve, reject) => {
     const uploadStream = cloudinary.uploader.upload_stream(
@@ -109,7 +114,7 @@ export const createProject = asyncHandler(
 //      res
 //        .status(400)
 //        .json({ message: "Title, description, and techStack are required" });
-//      return;
+//      return;k
 //    }
 //
 //    const thumbnailResult = await uploadToCloudinary(thumbnailFile.buffer);
@@ -152,6 +157,32 @@ export const createProject = asyncHandler(
 //  }
 //};
 //
+
+export const updateProject = asyncHandler(
+  async (req: Request, res: Response) => {
+    const { id } = req.params;
+    const files = req.files as { [fieldname: string]: Express.Multer.File[] };
+    const projectId = id as Id<"projects">;
+
+    const {
+      title,
+      description,
+      techStack,
+      projectUrl,
+      githubUrl,
+      removedImages,
+    } = req.body;
+
+    const existingProject = await convex.query(api.projects.getById, {
+      projectId
+    });
+
+    if(!existingProject){
+      res.status()
+    }
+  },
+
+);
 export const updateProject = async (
   req: Request,
   res: Response,
@@ -234,12 +265,12 @@ export const updateProject = async (
   }
 };
 
-
 export const deleteProject = asyncHandler(
   async (req: Request, res: Response) => {
     const { id } = req.params;
+    const projectId = id as Id<"projects">;
     const project = await convex.query(api.projects.getById, {
-      projectId: id as any,
+      projectId,
     });
 
     if (!project) {
