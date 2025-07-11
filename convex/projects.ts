@@ -26,7 +26,7 @@ export const getAll = query({
             // Menghindari error jika tech stack telah dihapus
             if (!tech) return { name: "Unknown", logoUrl: "" };
             return tech;
-          })
+          }),
         );
 
         return {
@@ -34,20 +34,27 @@ export const getAll = query({
           images: projectImages,
           techStack: techStackDetails,
         };
-      })
+      }),
     );
 
     return projectsWithDetails;
   },
 });
 
+// count total of the tech stack
+export const countAll = query({
+  handler: async (ctx) => {
+    const project = await ctx.db.query("projects").collect();
+    return project.length;
+  },
+});
 // Get a single project by its ID dengan detail lengkap
 export const getById = query({
   args: { projectId: v.id("projects") },
   handler: async (ctx, args) => {
     const project = await ctx.db.get(args.projectId);
     if (!project) {
-      throw new Error("Project not found");
+      return null
     }
 
     // Ambil gambar-gambar proyek
@@ -62,7 +69,7 @@ export const getById = query({
         const tech = await ctx.db.get(techId);
         if (!tech) return { name: "Unknown", logoUrl: "" };
         return tech;
-      })
+      }),
     );
 
     return {

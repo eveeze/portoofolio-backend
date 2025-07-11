@@ -21,7 +21,6 @@ import dotenv from "dotenv";
 dotenv.config();
 
 const { CONVEX_URL, RP_ID, RP_NAME, RP_ORIGIN, JWT_SECRET } = process.env;
-
 if (!CONVEX_URL || !RP_ID || !RP_NAME || !RP_ORIGIN || !JWT_SECRET) {
   throw new Error("Missing WebAuthn or JWT environment variables!");
 }

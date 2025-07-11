@@ -11,6 +11,16 @@ export const getAll = query({
     return await ctx.db.query("techStacks").order("desc").collect();
   },
 });
+/*
+ get the length of total tech stack
+  */
+export const countAll = query({
+
+  handler: async (ctx) => {
+    const techstacks = await ctx.db.query("techStacks").collect();
+    return techstacks.length
+  }
+})
 
 // --- MUTATIONS ---
 

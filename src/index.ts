@@ -4,13 +4,13 @@ import express, { Application, Request, Response } from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
-
+import { notFound , errorHandler } from "./middlewares/errorMiddleware";
 // Impor semua rute yang ada
 import projectRoutes from "./routes/projectRoutes";
 import techStackRoutes from "./routes/techStackRoutes";
 import authRoutes from "./routes/authRoutes";
 import devRoutes from "./routes/devRoutes";
-
+import dashboardRoutes from "./routes/dashboardRoutes"
 dotenv.config();
 
 const app: Application = express();
@@ -36,11 +36,15 @@ if (process.env.NODE_ENV !== "production") {
   console.log("🛠️  Development routes are enabled.");
   app.use("/api/dev", devRoutes);
 }
+app.use("/api/dashboard", dashboardRoutes);
 
 app.get("/", (req: Request, res: Response) => {
   res.send("Portfolio Backend Server is running!");
 });
 
+
+app.use(notFound);
+app.use(errorHandler)
 app.listen(PORT, () => {
   console.log(`🚀 Server is running on http://localhost:${PORT}`);
 });
