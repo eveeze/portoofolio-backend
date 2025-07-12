@@ -1,15 +1,14 @@
-// src/index.ts
 import express, { Application, Request, Response } from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
-import { notFound , errorHandler } from "./middlewares/errorMiddleware";
+import { notFound, errorHandler } from "./middlewares/errorMiddleware.js";
 // Impor semua rute yang ada
-import projectRoutes from "./routes/projectRoutes";
-import techStackRoutes from "./routes/techStackRoutes";
-import authRoutes from "./routes/authRoutes";
-import devRoutes from "./routes/devRoutes";
-import dashboardRoutes from "./routes/dashboardRoutes"
+import projectRoutes from "./routes/projectRoutes.js";
+import techStackRoutes from "./routes/techStackRoutes.js";
+import authRoutes from "./routes/authRoutes.js";
+import devRoutes from "./routes/devRoutes.js";
+import dashboardRoutes from "./routes/dashboardRoutes.js";
 dotenv.config();
 
 const app: Application = express();
@@ -41,9 +40,8 @@ app.get("/", (req: Request, res: Response) => {
   res.send("Portfolio Backend Server is running!");
 });
 
-
 app.use(notFound);
-app.use(errorHandler)
+app.use(errorHandler);
 app.listen(PORT, () => {
   console.log(`🚀 Server is running on http://localhost:${PORT}`);
 });

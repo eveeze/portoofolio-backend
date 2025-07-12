@@ -1,6 +1,5 @@
-// src/routes/devRoutes.ts
 import { Router } from "express";
-import { devLogin } from "../controllers/devController";
+import { devLogin } from "../controllers/devController.js";
 
 const router = Router();
 

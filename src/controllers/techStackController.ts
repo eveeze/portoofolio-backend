@@ -1,11 +1,10 @@
-// src/controllers/techStackController.ts
 import { Request, Response } from "express";
 import { ConvexHttpClient } from "convex/browser";
-import { api } from "../../convex/_generated/api";
-import cloudinary from "../config/cloudinary";
+import { api } from "../../convex/_generated/api.js";
+import cloudinary from "../config/cloudinary.js";
 import dotenv from "dotenv";
 import asyncHandler from "express-async-handler";
-import { Id } from "../../convex/_generated/dataModel";
+import { Id } from "../../convex/_generated/dataModel.js";
 
 dotenv.config();
 
@@ -24,10 +23,10 @@ const uploadToCloudinary = (fileBuffer: Buffer): Promise<any> => {
   return new Promise((resolve, reject) => {
     const uploadStream = cloudinary.uploader.upload_stream(
       { resource_type: "image", folder: "tech_logos" },
-      (error, result) => {
+      (error: any, result: any) => {
         if (error) reject(error);
         else resolve(result);
-      },
+      }
     );
     uploadStream.end(fileBuffer);
   });
@@ -42,7 +41,7 @@ export const getTechStacks = asyncHandler(
   async (req: Request, res: Response) => {
     const techStacks = await convex.query(api.techStacks.getAll, {});
     res.status(200).json(techStacks);
-  },
+  }
 );
 
 /*
@@ -71,12 +70,12 @@ export const createTechStack = asyncHandler(
 
     const techStackId = await convex.mutation(
       api.techStacks.create,
-      newTechStack,
+      newTechStack
     );
     res
       .status(201)
       .json({ message: "Tech stack created successfully", techStackId });
-  },
+  }
 );
 
 /*
@@ -105,5 +104,5 @@ export const deleteTechStack = asyncHandler(
     await convex.mutation(api.techStacks.remove, { id: techStackId });
 
     res.status(200).json({ message: "Tech stack deleted successfully" });
-  },
+  }
 );

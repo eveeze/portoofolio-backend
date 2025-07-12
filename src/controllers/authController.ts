@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { ConvexHttpClient } from "convex/browser";
-import { api } from "../../convex/_generated/api";
+import { api } from "../../convex/_generated/api.js";
 import {
   generateRegistrationOptions,
   verifyRegistrationResponse,
@@ -26,6 +26,16 @@ if (!CONVEX_URL || !RP_ID || !RP_NAME || !RP_ORIGIN || !JWT_SECRET) {
 }
 
 const convex = new ConvexHttpClient(CONVEX_URL);
+
+// Define a type for the authenticator to avoid implicit 'any'
+type Authenticator = {
+  credentialID: Buffer | ArrayBuffer;
+  credentialPublicKey: Buffer | ArrayBuffer;
+  counter: number;
+  credentialDeviceType: string;
+  credentialBackedUp: boolean;
+  transports?: string[];
+};
 
 // --- REGISTRATION ---
 
@@ -53,7 +63,7 @@ export const getRegistrationOptions = async (
     rpName: RP_NAME,
     rpID: RP_ID,
     userName: user.username,
-    excludeCredentials: user.authenticators.map((auth) => ({
+    excludeCredentials: user.authenticators.map((auth: Authenticator) => ({
       id: isoBase64URL.fromBuffer(Buffer.from(auth.credentialID)),
       type: "public-key",
       transports: auth.transports as AuthenticatorTransportFuture[] | undefined,
@@ -98,19 +108,16 @@ export const verifyRegistration = async (
   const { verified, registrationInfo } = verification;
 
   if (verified && registrationInfo) {
-    // Fixed: Access credential properties correctly
     const { credential } = registrationInfo;
 
     await convex.mutation(api.users.addAuthenticator, {
       userId: user._id,
       authenticator: {
-        // Fixed: Convert credential.id (ArrayBuffer) to Buffer for storage
         credentialID: Buffer.from(credential.id),
         credentialPublicKey: Buffer.from(credential.publicKey),
         counter: credential.counter,
         credentialDeviceType: registrationInfo.credentialDeviceType,
         credentialBackedUp: registrationInfo.credentialBackedUp,
-        // Fixed: Get transports from the response, not registrationInfo
         transports:
           (req.body as RegistrationResponseJSON).response?.transports || [],
       },
@@ -141,8 +148,7 @@ export const getAuthenticationOptions = async (
 
   const options = await generateAuthenticationOptions({
     rpID: RP_ID,
-    // Fixed: Convert ArrayBuffer to base64url string for allowCredentials
-    allowCredentials: user.authenticators.map((auth) => ({
+    allowCredentials: user.authenticators.map((auth: Authenticator) => ({
       id: isoBase64URL.fromBuffer(Buffer.from(auth.credentialID)),
       type: "public-key",
       transports: auth.transports as AuthenticatorTransportFuture[] | undefined,
@@ -176,7 +182,7 @@ export const verifyAuthentication = async (
   const requestBody = req.body as AuthenticationResponseJSON;
   const requestCredentialIDBuffer = isoBase64URL.toBuffer(requestBody.id);
 
-  const authenticator = user.authenticators.find((auth) =>
+  const authenticator = user.authenticators.find((auth: Authenticator) =>
     Buffer.from(auth.credentialID).equals(requestCredentialIDBuffer)
   );
 
@@ -188,13 +194,11 @@ export const verifyAuthentication = async (
 
   let verification: VerifiedAuthenticationResponse;
   try {
-    // Fixed: Pass authenticator data in the correct structure
     verification = await verifyAuthenticationResponse({
       response: requestBody,
       expectedChallenge: user.currentChallenge,
       expectedOrigin: RP_ORIGIN,
       expectedRPID: RP_ID,
-      // Fixed: Pass credential object with the correct data types
       credential: {
         id: isoBase64URL.fromBuffer(Buffer.from(authenticator.credentialID)),
         publicKey: Buffer.from(authenticator.credentialPublicKey),

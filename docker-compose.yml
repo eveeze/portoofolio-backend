@@ -1,0 +1,29 @@
+# The top-level version key is no longer needed with modern Docker Compose
+services:
+  # The backend service for your Node.js application
+  backend:
+    build: .
+    container_name: backend-1
+    ports:
+      # Map port 5001 on your machine to port 5001 in the container
+      - "5001:5001"
+    # Load environment variables from a .env file for security
+    env_file:
+      - .env
+    # Make the backend service depend on the redis service
+    depends_on:
+      - redis
+    restart: unless-stopped
+
+  # The Redis service
+  redis:
+    image: "redis:alpine"
+    container_name: redis-1
+    volumes:
+      # Persist Redis data across container restarts
+      - redis-data:/data
+    restart: unless-stopped
+
+# Define a named volume for Redis data persistence
+volumes:
+  redis-data:

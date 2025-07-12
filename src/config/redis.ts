@@ -1,4 +1,4 @@
-import Redis from "ioredis";
+import { Redis } from "ioredis";
 import dotenv from "dotenv";
 
 dotenv.config();
@@ -11,15 +11,16 @@ try {
   }
 
   redisClient = new Redis(process.env.REDIS_URL);
+
   redisClient.on("connect", () => {
-    console.log(" berhasil konek ke server redis.");
+    console.log("✅ Berhasil konek ke server redis.");
   });
 
   redisClient.on("error", (error: Error) => {
-    console.log("Redis Client Error : ", error);
+    console.log("❌ Redis Client Error:", error);
   });
 } catch (error) {
-  console.error("Fialed to initialize redis cleint ", error);
+  console.error("❌ Failed to initialize redis client:", error);
   process.exit(1);
 }
 

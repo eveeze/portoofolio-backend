@@ -1,6 +1,5 @@
-// src/middlewares/cacheMiddleware.ts
 import { Request, Response, NextFunction, RequestHandler } from "express";
-import redisClient from "../config/redis";
+import redisClient from "../config/redis.js";
 
 // Tambahkan : RequestHandler sebagai tipe return
 export const cache = (cacheKey: string, ttl: number = 3600): RequestHandler => {
@@ -10,7 +9,8 @@ export const cache = (cacheKey: string, ttl: number = 3600): RequestHandler => {
 
       if (cachedData) {
         console.log(`✅ Cache HIT for key: ${cacheKey}`);
-        return res.status(200).json(JSON.parse(cachedData));
+        res.status(200).json(JSON.parse(cachedData));
+        return;
       }
 
       console.log(`⚪️ Cache MISS for key: ${cacheKey}`);
@@ -19,7 +19,7 @@ export const cache = (cacheKey: string, ttl: number = 3600): RequestHandler => {
       res.json = (body) => {
         redisClient.setex(cacheKey, ttl, JSON.stringify(body));
         console.log(
-          `📝 Data for key: ${cacheKey} has been cached for ${ttl} seconds.`,
+          `📝 Data for key: ${cacheKey} has been cached for ${ttl} seconds.`
         );
         return originalJson(body);
       };

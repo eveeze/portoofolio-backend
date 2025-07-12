@@ -3,7 +3,7 @@ import asyncHandler from "express-async-handler";
 
 import { ConvexHttpClient } from "convex/browser";
 
-import { api } from "../../convex/_generated/api";
+import { api } from "../../convex/_generated/api.js";
 
 import dotenv from "dotenv";
 
@@ -20,7 +20,6 @@ const convex = new ConvexHttpClient(CONVEX_URL);
  @route GET /api/dashboard/stats 
  @access Private
  * */
-
 
 export const getStats = asyncHandler(async (req: Request, res: Response) => {
   const [totalProjects, totalTechStacks] = await Promise.all([

@@ -1,12 +1,10 @@
-// src/controllers/projectController.ts
-// src/controllers/projectController.ts
 import { Request, Response } from "express";
 import { ConvexHttpClient } from "convex/browser";
-import { api } from "../../convex/_generated/api";
-import cloudinary from "../config/cloudinary";
+import { api } from "../../convex/_generated/api.js";
+import cloudinary from "../config/cloudinary.js";
 import dotenv from "dotenv";
 import asyncHandler from "express-async-handler";
-import { Id } from "../../convex/_generated/dataModel";
+import { Id } from "../../convex/_generated/dataModel.js";
 
 dotenv.config();
 
@@ -25,10 +23,10 @@ const uploadToCloudinary = (fileBuffer: Buffer): Promise<any> => {
   return new Promise((resolve, reject) => {
     const uploadStream = cloudinary.uploader.upload_stream(
       { folder: "portfolio_projects" }, // Folder spesifik untuk proyek
-      (error, result) => {
+      (error: any, result: any) => {
         if (error) reject(error);
         else resolve(result);
-      },
+      }
     );
     uploadStream.end(fileBuffer);
   });
@@ -80,7 +78,7 @@ export const createProject = asyncHandler(
 
     const projectId = await convex.mutation(
       api.projects.create,
-      newProjectData,
+      newProjectData
     );
 
     if (projectImageFiles.length > 0) {
@@ -97,7 +95,7 @@ export const createProject = asyncHandler(
     res
       .status(201)
       .json({ message: "Project created successfully", projectId });
-  },
+  }
 );
 
 /*
@@ -128,7 +126,6 @@ export const updateProject = asyncHandler(
       throw new Error("Project not found");
     }
 
-    // 1. Kumpulkan data teks untuk di-update
     const updatedData: { [key: string]: any } = {};
     if (title) updatedData.title = title;
     if (description) updatedData.description = description;
@@ -136,7 +133,6 @@ export const updateProject = asyncHandler(
     if (githubUrl) updatedData.githubUrl = githubUrl;
     if (techStack) updatedData.techStack = JSON.parse(techStack);
 
-    // 2. Handle update thumbnail jika ada file baru
     const thumbnailFile = files?.["thumbnail"]?.[0];
     if (thumbnailFile) {
       await cloudinary.uploader.destroy(existingProject.thumbnailId);
@@ -145,12 +141,11 @@ export const updateProject = asyncHandler(
       updatedData.thumbnailId = thumbnailResult.public_id;
     }
 
-    // 3. Handle penghapusan gambar spesifik
     if (removedImages) {
       const imagePublicIdsToRemove: string[] = JSON.parse(removedImages);
       for (const publicId of imagePublicIdsToRemove) {
         const imageDoc = existingProject.images.find(
-          (img) => img.imageId === publicId,
+          (img: any) => img.imageId === publicId
         );
         if (imageDoc) {
           await cloudinary.uploader.destroy(publicId);
@@ -161,7 +156,6 @@ export const updateProject = asyncHandler(
       }
     }
 
-    // 4. Handle penambahan gambar baru
     const projectImageFiles = files?.["projectImages"] || [];
     for (const file of projectImageFiles) {
       const imageResult = await uploadToCloudinary(file.buffer);
@@ -172,7 +166,6 @@ export const updateProject = asyncHandler(
       });
     }
 
-    // 5. Kirim pembaruan ke Convex jika ada perubahan data
     if (Object.keys(updatedData).length > 0) {
       await convex.mutation(api.projects.update, {
         id: projectId,
@@ -181,7 +174,7 @@ export const updateProject = asyncHandler(
     }
 
     res.status(200).json({ message: "Project updated successfully" });
-  },
+  }
 );
 
 /*
@@ -202,19 +195,17 @@ export const deleteProject = asyncHandler(
       throw new Error("Project not found");
     }
 
-    // 1. Hapus thumbnail dari Cloudinary
     await cloudinary.uploader.destroy(project.thumbnailId);
 
-    // 2. Hapus semua gambar proyek terkait dari Cloudinary
     if (project.images && project.images.length > 0) {
-      const imageIdsToDelete = project.images.map((image) => image.imageId);
-      // 'delete_resources' lebih efisien untuk menghapus banyak file
+      const imageIdsToDelete = project.images.map(
+        (image: any) => image.imageId
+      );
       await cloudinary.api.delete_resources(imageIdsToDelete);
     }
 
-    // 3. Hapus project dari database Convex (ini juga akan menghapus relasi gambar)
     await convex.mutation(api.projects.remove, { id: projectId });
 
     res.status(200).json({ message: "Project deleted successfully" });
-  },
+  }
 );

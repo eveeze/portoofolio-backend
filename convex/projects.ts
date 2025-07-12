@@ -1,13 +1,15 @@
 // convex/projects.ts
-import { query, mutation } from "./_generated/server";
+import { query, mutation } from "./_generated/server.js";
 import { v } from "convex/values";
+import { QueryCtx, MutationCtx } from "./_generated/server.js";
+import { Id } from "./_generated/dataModel.js";
 
 // --- QUERIES (Read operations) ---
 
 // Get all projects dengan detail tech stack dan gambar
 export const getAll = query({
   args: {},
-  handler: async (ctx) => {
+  handler: async (ctx: QueryCtx) => {
     const projects = await ctx.db.query("projects").order("desc").collect();
 
     // Untuk setiap proyek, kita akan mengambil data gambar dan tech stack terkait
@@ -21,12 +23,12 @@ export const getAll = query({
 
         // Ambil detail tech stack
         const techStackDetails = await Promise.all(
-          project.techStack.map(async (techId) => {
+          project.techStack.map(async (techId: Id<"techStacks">) => {
             const tech = await ctx.db.get(techId);
             // Menghindari error jika tech stack telah dihapus
             if (!tech) return { name: "Unknown", logoUrl: "" };
             return tech;
-          }),
+          })
         );
 
         return {
@@ -34,7 +36,7 @@ export const getAll = query({
           images: projectImages,
           techStack: techStackDetails,
         };
-      }),
+      })
     );
 
     return projectsWithDetails;
@@ -43,7 +45,7 @@ export const getAll = query({
 
 // count total of the tech stack
 export const countAll = query({
-  handler: async (ctx) => {
+  handler: async (ctx: QueryCtx) => {
     const project = await ctx.db.query("projects").collect();
     return project.length;
   },
@@ -51,10 +53,10 @@ export const countAll = query({
 // Get a single project by its ID dengan detail lengkap
 export const getById = query({
   args: { projectId: v.id("projects") },
-  handler: async (ctx, args) => {
+  handler: async (ctx: QueryCtx, args: { projectId: Id<"projects"> }) => {
     const project = await ctx.db.get(args.projectId);
     if (!project) {
-      return null
+      return null;
     }
 
     // Ambil gambar-gambar proyek
@@ -65,11 +67,11 @@ export const getById = query({
 
     // Ambil detail tech stack
     const techStackDetails = await Promise.all(
-      project.techStack.map(async (techId) => {
+      project.techStack.map(async (techId: Id<"techStacks">) => {
         const tech = await ctx.db.get(techId);
         if (!tech) return { name: "Unknown", logoUrl: "" };
         return tech;
-      }),
+      })
     );
 
     return {
@@ -95,7 +97,10 @@ export const update = mutation({
     thumbnailUrl: v.optional(v.string()),
     thumbnailId: v.optional(v.string()),
   },
-  handler: async (ctx, { id, ...args }) => {
+  handler: async (
+    ctx: MutationCtx,
+    { id, ...args }: { id: Id<"projects">; [key: string]: any }
+  ) => {
     await ctx.db.patch(id, args);
     return id; // Mengembalikan ID proyek yang diperbarui
   },
@@ -111,7 +116,18 @@ export const create = mutation({
     thumbnailUrl: v.string(),
     thumbnailId: v.string(),
   },
-  handler: async (ctx, args) => {
+  handler: async (
+    ctx: MutationCtx,
+    args: {
+      title: string;
+      description: string;
+      techStack: Id<"techStacks">[];
+      projectUrl?: string;
+      githubUrl?: string;
+      thumbnailUrl: string;
+      thumbnailId: string;
+    }
+  ) => {
     const projectId = await ctx.db.insert("projects", {
       title: args.title,
       description: args.description,
@@ -126,7 +142,7 @@ export const create = mutation({
 });
 export const removeImageFromProject = mutation({
   args: { imageId: v.id("projectImages") },
-  handler: async (ctx, args) => {
+  handler: async (ctx: MutationCtx, args: { imageId: Id<"projectImages"> }) => {
     await ctx.db.delete(args.imageId);
   },
 });
@@ -137,7 +153,10 @@ export const addImageToProject = mutation({
     imageUrl: v.string(),
     imageId: v.string(),
   },
-  handler: async (ctx, args) => {
+  handler: async (
+    ctx: MutationCtx,
+    args: { projectId: Id<"projects">; imageUrl: string; imageId: string }
+  ) => {
     await ctx.db.insert("projectImages", {
       projectId: args.projectId,
       imageUrl: args.imageUrl,
@@ -149,7 +168,7 @@ export const addImageToProject = mutation({
 // Delete a project
 export const remove = mutation({
   args: { id: v.id("projects") },
-  handler: async (ctx, args) => {
+  handler: async (ctx: MutationCtx, args: { id: Id<"projects"> }) => {
     const imagesToDelete = await ctx.db
       .query("projectImages")
       .withIndex("by_projectId", (q) => q.eq("projectId", args.id))

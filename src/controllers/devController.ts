@@ -1,7 +1,7 @@
 // src/controllers/devController.ts
 import { Request, Response } from "express";
 import { ConvexHttpClient } from "convex/browser";
-import { api } from "../../convex/_generated/api";
+import { api } from "../../convex/_generated/api.js";
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
 
