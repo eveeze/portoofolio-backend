@@ -21,6 +21,7 @@ const convex = new ConvexHttpClient(CONVEX_URL);
  @access Private
  * */
 
+
 export const getStats = asyncHandler(async (req: Request, res: Response) => {
   const [totalProjects, totalTechStacks] = await Promise.all([
     convex.query(api.projects.countAll),
